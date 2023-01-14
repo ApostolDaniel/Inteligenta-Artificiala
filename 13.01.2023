@@ -1,0 +1,97 @@
+#!/usr/bin/env python
+# coding: utf-8
+
+# In[ ]:
+
+
+import datetime
+import json
+import tkinter as tk
+
+def check_registration(registration_number, date_of_check):
+    if not valid_registration_number(registration_number):
+        return "Numarul de inmatriculare nu este valid"
+
+    if not valid_vignette(registration_number, date_of_check):
+        return "Rovinieta expirata sau nu existenta"
+
+    return "Numarul de inmatriculare si rovinieta sunt valide"
+
+def get_vignette_expiration_date(registration_number):
+    with open("rovg.json", "r") as json_file:
+        data = json.load(json_file)
+        for item in data:
+            if item["numar"] == registration_number:
+                return datetime.datetime.strptime(item["valid"], "%Y-%m-%d")
+    return None
+    
+def valid_registration_number(registration_number):
+    if len(registration_number) != 7:
+        return False
+    if not registration_number.isalnum():
+        return False
+    return True
+
+def valid_vignette(registration_number, date_of_check):
+    expiration_date = get_vignette_expiration_date(registration_number)
+    if expiration_date is None:
+        return False
+
+    return expiration_date > date_of_check
+
+
+def check_registration_ui():
+    def on_check():
+        registration_number = registration_number_entry.get()
+        result = check_registration(registration_number, datetime.datetime.now())
+        result_label.config(text=result)
+
+    root = tk.Tk()
+    root.title("Verificare Rovinieta")
+
+    registration_number_label = tk.Label(root, text="Numar de inmatriculare:")
+    registration_number_label.grid(row=0, column=0, padx=5, pady=5)
+
+    registration_number_entry = tk.Entry(root)
+    registration_number_entry.grid(row=0, column=1, padx=5, pady=5)
+
+    check_button = tk.Button(root, text="Verifica", command=on_check)
+    check_button.grid(row=1, column=0, columnspan=2, padx=5, pady=5)
+
+    result_label = tk.Label(root, text="")
+    result_label.grid(row=2, column=0, columnspan=2, padx=5, pady=5)
+
+    root.mainloop()
+
+check_registration_ui()
+
+
+
+
+
+
+[
+    {
+        "numar": "BC54AGV",
+        "valid": "2023-12-31"
+    },
+    {
+        "numar": "BC23DXM",
+        "valid": "2022-11-15"
+    },
+    {
+        "numar": "BC89HGV",
+        "valid": "2023-12-21"
+    },{
+        "numar": "BC23ABC",
+        "valid": "2022-02-30"
+    },{
+        "numar": "BC54AFC",
+        "valid": "2023-05-26"
+    },{
+        "numar": "BC23LKM",
+        "valid": "2023-04-24"
+    }
+]
+
+
